@@ -13,9 +13,9 @@ def lev_dist_ops(str1, str2):
     else:
         cost = 1
 
-    dist_insert, ops_insert = lev_dist_ops(tuple(str1), tuple(str2))
-    dist_delete, ops_delete = lev_dist_ops(tuple(str1[1:]), tuple(str2))
-    dist_replace, ops_replace = lev_dist_ops(tuple(str1[1:]), tuple(str2[1:]))
+    # dist_insert, ops_insert = lev_dist_ops(tuple(str1), tuple(str2))
+    # dist_delete, ops_delete = lev_dist_ops(tuple(str1[1:]), tuple(str2))
+    # dist_replace, ops_replace = lev_dist_ops(tuple(str1[1:]), tuple(str2[1:]))
 
     dist_insert += 1
     dist_delete += 1
