@@ -1,110 +1,83 @@
 ﻿def script(check, x, y):
-    level = check("level")
-    gold = check("gold", x, y)
-
-    if level == 1:
-        if gold != 0:
-            return "take"
-        if not check("wall", x + 2, y):
-            return "right"
-        return "down"
-
-    elif level == 2:
-        if gold != 0:
-            return "take"
-        if not check("wall", x + 2, y) and check("wall", x, y + 1):
-            return "right"
-        if check("gold", x, y + 1) != 0:
-            return "down"
-        if not check("wall", x, y - 1):
-            return "up"
+    if check("gold", x, y) != 0:
+        return "take"
+    elif check("gold", x + 1, y) != 0:
         return "right"
+    elif check("gold", x - 1, y) != 0:
+        return "left"
+    elif check("gold", x, y + 1) != 0:
+        return "down"
+    elif check("gold", x, y - 1) != 0:
+        return "up"
+    else:
+        all_w = []
+        if not check("wall", x, y - 1):
+            all_w.append('up')
+        if not check("wall", x, y + 1):
+            all_w.append('down')
+        if not check("wall", x - 1, y):
+            all_w.append('left')
+        if not check("wall", x + 1, y):
+            all_w.append('right')
+        start_pos_1 = (x, y)
 
-    elif level == 3:
-        if gold != 0:
-            return "take"
+        end_pos = (0, 0)
 
-        def is_wall(a, b):
-            return check("wall", x + a, y + b)
+        width, height = 35, 35
+        v = [(x, y)]
+        # словарь расстояний
+        d = {(x, y): 0}
+        while len(v) > 0:
+            x, y = v.pop(0)
+            for dy in range(-1, 2):
+                for dx in range(-1, 2):
+                    if dx * dy != 0:
+                        continue
+                    if x + dx < 0 or x + dx >= width or y + dy < 0 or y + dy >= height:
+                        continue
+                    if not check("wall", x + dx, y + dy):
+                        dn = d.get((x + dx, y + dy), -1)
+                        if dn == -1:
+                            d[(x + dx, y + dy)] = d[(x, y)] + 1
+                            v.append((x + dx, y + dy))
+        x1, y1 = start_pos_1
 
-        if is_wall(-1, 0) and not is_wall(0, -1):
-            return "up"
-        if is_wall(0, -1) and not is_wall(1, 0):
-            return "right"
-        if is_wall(-1, -1) and not is_wall(0, -1):
-            return "up"
-        if is_wall(1, 0) and not is_wall(0, 1):
-            return "down"
-        if is_wall(1, -1) and not is_wall(1, 0):
-            return "right"
-        if is_wall(-1, 1) and not is_wall(-1, 0):
-            return "left"
-        if is_wall(0, 1) and not is_wall(-1, 0):
-            return "left"
-        if is_wall(1, 1) and not is_wall(0, 1):
-            return "down"
+        def geet_path(v):
+            path = [v]
+            while v != (x1, y1):
+                for dy in range(-1, 2):
+                    for dx in range(-1, 2):
+                        if dx * dy != 0 or (dx == 0 and dy == 0):
+                            continue
+                        x = v[0]
+                        y = v[1]
+                        if x + dx < 0 or x + dx >= width or y + dy < 0 or y + dy >= height:
+                            continue
+                        if d.get((x + dx, y + dy), -100) == d[v] - 1:
+                            v = (x + dx, y + dy)
+                            path.append(v)
+            return path
 
-    elif level == 4:
-        if gold != 0:
-            return "take"
+        wdfsdf = 10000
+        for z in range(30):
+            for i in range(-z, z + 1):
+                for j in range(-z, z + 1):
+                    if check("gold", x + i, y + j):
+                        dfdf = len(geet_path((x + i, y + j)))
+                        if dfdf < wdfsdf:
+                            end_pos = (x + i, y + j)
+                            wdfsdf = dfdf
 
-        positions = [(3, 16), (4, 16), (10, 13), (10, 12)]
-        for pos in positions:
-            if (x, y) == pos:
-                return "right" if pos[1] == 16 else "up"
+        path = geet_path(end_pos)
+        y1, x1 = start_pos_1
+        y2, x2 = path[-2]
 
-        def is_wall(a, b):
-            return check("wall", x + a, y + b)
-
-        if is_wall(-1, 0) and not is_wall(0, -1):
-            return "up"
-        if is_wall(0, -1) and not is_wall(1, 0):
-            return "right"
-        if is_wall(-1, -1) and not is_wall(0, -1):
-            return "up"
-        if is_wall(1, 0) and not is_wall(0, 1):
-            return "down"
-        if is_wall(1, -1) and not is_wall(1, 0):
-            return "right"
-        if is_wall(-1, 1) and not is_wall(-1, 0):
-            return "left"
-        if is_wall(0, 1) and not is_wall(-1, 0):
-            return "left"
-        if is_wall(1, 1) and not is_wall(0, 1):
-            return "down"
-
-    elif check("level") == 5:
-        if (check("gold", x, y) != 0):
-            return "take"
-        if (check("gold",x+1,y)!=0):
-            return "right"
-        if (check("gold",x-1,y)!=0):
-            return "left"
-        if (check("gold",x,y+1)!=0):
-            return "down"
-        if (check("gold",x,y-1)!=0):
-            return "up"
-        # print(x, y)
-        # if check("gold", x, y) != 0:
-        #     return "take"
-        #
-        # left_wall = check("wall", x - 1, y)
-        # right_wall = check("wall", x + 1, y)
-        # up_wall = check("wall", x, y - 1)
-        # down_wall = check("wall", x, y + 1)
-        # if not left_wall:
-        #     "left"
-        #
-        #
-        # # if x == 8 and y == 7:
-        # #     return "left"
-        # # if x == 7 and y == 7:
-        # #     return "up"
-        # # if x == 7 and y == 6:
-        # #     return "up"
-        # # if x == 7 and y == 5:
-        # #     return "left"
-        # # if x == 6 and y == 5:
-        # #     return "up"
-
-
+        if y1 < y2:
+            s = 'right'
+        elif y1 > y2:
+            s = 'left'
+        elif x1 < x2:
+            s = 'down'
+        else:
+            s = 'up'
+        return s
