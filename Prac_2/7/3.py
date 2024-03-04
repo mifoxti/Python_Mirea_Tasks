@@ -3,6 +3,7 @@ class Room:
         self.description = description
         self.options = options
 
+
 def is_dead_end(room, visited, rooms):
     if room.options:
         for next_room_number in room.options.values():
@@ -14,6 +15,7 @@ def is_dead_end(room, visited, rooms):
     else:
         return True
     return False
+
 
 def main():
     rooms = {
@@ -32,6 +34,7 @@ def main():
         print("В игровом мире есть тупики.")
     else:
         print("В игровом мире нет тупиков.")
+
 
 if __name__ == "__main__":
     main()

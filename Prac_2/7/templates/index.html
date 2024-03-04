@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игровой мир</title>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+    <p>{{ room.description }}</p>
+    <ul>
+        {% for option, next_room in room.options.items() %}
+            <li><a href="/room/{{ next_room }}">Выбрать {{ option }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
