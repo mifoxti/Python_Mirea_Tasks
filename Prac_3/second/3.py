@@ -1,58 +1,68 @@
+import random
+
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba
+import random
 
-# Палитра PICO-8
-pico8_palette = [
-    '#1D2B53', '#7E2553', '#008751', '#AB5236',
-    '#5F574F', '#C2C3C7', '#FFF1E8', '#FF004D',
-    '#FFA300', '#FFEC27', '#00E436', '#29ADFF',
-    '#83769C', '#FF77A8', '#FFCCAA'
-]
+def generate_colored_sprite():
+    # Создаем случайные бинарные значения (0 или 1) для верхней левой части (левая половина) 5x5
+    upper_left = np.random.randint(0, 2, size=(3, 3))
 
-def generate_random_symmetric_sprite():
-    # Создаем случайную половину спрайта размером 5x5 с использованием палитры PICO-8
-    sprite_half = np.random.randint(0, len(pico8_palette), size=(5, 3), dtype=int)
+    # Задаем цвет для черных пикселей
+    black_color = np.array([0, 0, 0])
 
-    # Симметричное отражение по вертикали и горизонтали
-    sprite = np.concatenate([sprite_half, np.fliplr(sprite_half)], axis=1)
-    sprite = np.concatenate([sprite, np.flipud(sprite)], axis=0)
+    # Задаем два случайных цвета для цветной части
+    color1 = np.random.rand(3)
+    color2 = np.random.rand(3)
+
+    # 3-канальный массив для хранения цвета (RGB)
+    sprite = np.zeros((5, 5, 3))
+
+    # Заполняем спрайт с вертикальной симметрией и двумя разными цветами
+    for i in range(5):
+        for j in range(5):
+            if random.choice([True, False]):
+                sprite[i, j] = color1
+                sprite[i, 4 - j] = color1  # Симметричная часть
+            else:
+                sprite[i, j] = color2
+                sprite[i, 4 - j] = color2  # Симметричная часть
+
+            # Заполняем черные клетки
+            if upper_left[i // 2, j // 2] == 0:
+                sprite[i, j] = black_color
+                sprite[i, 4 - j] = black_color  # Симметричная часть
 
     return sprite
 
-def generate_sprite_map(rows, cols, spacing):
+def generate_sprite_map(rows, cols):
+    # Размер каждого спрайта (5x5)
     sprite_size = 5
-    # Рассчитываем размеры карты спрайтов с учетом пустого пространства
-    map_size = (rows * (sprite_size + spacing) - spacing, cols * (sprite_size + spacing) - spacing, 4)
-    sprite_map = np.zeros(map_size, dtype=float)
 
+    # Размер каждой ячейки (включая пространство между спрайтами)
+    cell_size = sprite_size + 1
+
+    # Создаем пустую карту спрайтов
+    sprite_map = np.zeros((rows * cell_size - 1, cols * cell_size - 1, 3))
+
+    # Заполняем карту спрайтами
     for i in range(rows):
         for j in range(cols):
-            # Получаем случайный симметричный спрайт
-            sprite = generate_random_symmetric_sprite()
-
-            # Вычисляем симметричные цвета для каждого цвета в палитре PICO-8
-            symmetric_colors = [to_rgba(pico8_palette[idx]) for idx in sprite.flatten()]
-            symmetric_colors = [(*color[:3], 1 - color[3]) for color in symmetric_colors]
-
-            # Конвертируем в массив NumPy
-            symmetric_colors = np.array(symmetric_colors, dtype=float).reshape(5, 5, 4)
-
-            # Рассчитываем координаты для вставки спрайта с учетом пустого пространства
-            x_start = i * (sprite_size + spacing)
-            x_end = x_start + sprite_size
-            y_start = j * (sprite_size + spacing)
-            y_end = y_start + sprite_size
-
-            # Помещаем цветной спрайт в соответствующую позицию на карте
-            sprite_map[x_start:x_end, y_start:y_end, :] = symmetric_colors
+            sprite_map[i * cell_size: i * cell_size + sprite_size,
+            j * cell_size: j * cell_size + sprite_size] = generate_colored_sprite()
 
     return sprite_map
 
-# Генерация карты спрайтов 3x3 с пустым пространством
-sprite_map = generate_sprite_map(3, 3, 2)
+# Задаем количество строк и столбцов
+num_rows = 5
+num_cols = 30
 
-# Вывод карты спрайтов с помощью imshow
-plt.imshow(sprite_map)
-plt.title('Sprite Map with Spacing')
+
+# Генерируем карту спрайтов
+sprite_map = generate_sprite_map(num_rows, num_cols)
+
+# Отображаем карту спрайтов с помощью imshow
+plt.imshow(sprite_map, interpolation='nearest')
+plt.title(f'Colored Symmetric Sprite Map ({num_rows}x{num_cols} sprites)')
+plt.axis('off')  # Отключаем оси
 plt.show()
