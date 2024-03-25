@@ -28,6 +28,12 @@ class MyHashTable:
     def __iter__(self):
         return iter(self.table)
 
+    def __contains__(self, key):
+        for k, _ in self.table:
+            if k == key:
+                return True
+        return False
+
     def keys(self):
         return [k for k, v in self.table]
 
