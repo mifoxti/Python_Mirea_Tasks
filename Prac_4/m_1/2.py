@@ -12,11 +12,8 @@ def call_method(obj, method_name):
     else:
         print(f"Method '{method_name}' not found in class.")
 
-# Создаем объект класса
 obj = MyClass()
 
-# Имя метода, который мы хотим вызвать
 method_to_call = "method1"
 
-# Вызываем метод
 call_method(obj, method_to_call)
