@@ -6,45 +6,71 @@ class Tag:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
     def __call__(self, *args, **kwargs):
-        for arg in args:
-            self.children.append(str(arg))
+        child = Tag(*args, **kwargs)
+        self.children.append(child)
+        return child
 
-    def __str__(self):
-        content = '\n'.join(self.children)
-        return f'<{self.name}>\n{content}\n</{self.name}>'
+    def get_code(self, indent=0):
+        code = ' ' * indent + f'<{self.name}>\n'
+        for child in self.children:
+            code += child.get_code(indent + 4)
+        code += ' ' * indent + f'</{self.name}>\n'
+        return code
+
+    # Метод для добавления содержимого в тег
+    def content(self, content):
+        self.children.append(content)
+        return self
 
 
-class HTML:
+class HTML(Tag):
     def __init__(self):
-        self.root = None
-        self.current_tag = None
+        super().__init__('html')
 
-    def __getattr__(self, name):
-        if name not in self.__dict__:
-            self.current_tag = Tag(name)
-            if self.root is None:
-                self.root = self.current_tag
-            else:
-                self.root.children.append(self.current_tag)
-            return self.current_tag
-        return self.__dict__[name]
+    def body(self):
+        return Body()
 
     def get_code(self):
-        return str(self.root)
+        code = '<!DOCTYPE html>\n'
+        code += super().get_code()
+        return code
+
+    # Метод для создания тега <div>
+    def div(self):
+        return Div()
 
 
-# Пример использования
-html = HTML()
-with html.body():
-    with html.div():
-        with html.div():
-            html.p('Первая строка.')
-            html.p('Вторая строка.')
-        with html.div():
-            html.p('Третья строка.')
+class Body(HTML):
+    def __init__(self):
+        super().__init__('body')
 
-print(html.get_code())
+
+class Div(HTML):
+    def __init__(self):
+        super().__init__('div')
+
+    def p(self, content):
+        return self.content(P(content))
+
+
+class P(HTML):
+    def __init__(self, content):
+        super().__init__('p')
+        self.content(content)
+
+
+if __name__ == '__main__':
+    html = HTML()
+    with html.body() as body:
+        with html.div() as div1:
+            with div1.div() as div2:
+                div2.p('Первая строка.')
+                div2.p('Вторая строка.')
+            with div1.div() as div3:
+                div3.p('Третья строка.')
+
+    print(html.get_code())
