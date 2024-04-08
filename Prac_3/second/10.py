@@ -1,6 +1,5 @@
 from PIL import Image
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
 import numpy as np
 
 def load_image(image_path):
@@ -32,11 +31,12 @@ def visualize_voxel_landscape(texture, heightmap, camera_x, camera_y, screen_wid
             # Задаем цвет пикселя визуализации
             visualization[camera_y - y - 1, x - view_left] = texture_color
 
-    # Создаем изображение для визуализации текстуры с треугольником, обозначающим область обзора камеры
+    # Создаем изображение для визуализации текстуры с заполненным треугольником, обозначающим область обзора камеры
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     ax.imshow(texture)
-    triangle = Polygon([[camera_x, view_start], [view_left, view_end], [view_right, view_end]], closed=True, edgecolor='r', facecolor='none')
-    ax.add_patch(triangle)
+    triangle_points = [[camera_x, view_start], [view_left, view_end], [view_right, view_end], [camera_x, view_start]]
+    ax.plot([point[0] for point in triangle_points], [point[1] for point in triangle_points], color='r')
+    ax.fill([point[0] for point in triangle_points], [point[1] for point in triangle_points], color='r', alpha=0.3)
     ax.set_title("Texture with Camera View")
     plt.show()
 
