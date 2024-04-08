@@ -1,9 +1,11 @@
 import tkinter as tk
 
+
 class Node:
     def __init__(self, key, children=None):
         self.key = key
         self.children = children if children else []
+
 
 class TreeDrawer:
     def __init__(self, root, canvas, width=800, height=600):
@@ -37,6 +39,7 @@ class TreeDrawer:
                     next_x += dx
             self.canvas.update()
 
+
 def main():
     root = Node(1, [
         Node(2, [
@@ -59,6 +62,7 @@ def main():
     tree_drawer.draw_tree()
 
     window.mainloop()
+
 
 if __name__ == "__main__":
     main()
