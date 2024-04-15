@@ -20,6 +20,9 @@ class TestRLE(unittest.TestCase):
         self.assertEqual(data, decoded_data)
 
 def encode_rle(data):
+    if not data:  # Если строка пустая
+        return b''
+
     encoded = bytes()
     count = 1
     last_char = data[0]
