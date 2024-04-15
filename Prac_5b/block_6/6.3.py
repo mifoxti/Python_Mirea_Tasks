@@ -1,4 +1,14 @@
+import matplotlib.pyplot as plt
+import networkx as nx
+
 from collections import deque
+
+# Функция перехода в другую комнату
+def go(room):
+    def func(state):
+        return dict(state, room=room)
+    return func
+
 
 def make_model(game, start_state):
     """
@@ -35,14 +45,24 @@ def make_model(game, start_state):
                 graph[tuple(current_state.items())][action] = tuple(next_state.items())
                 queue.append(next_state)  # Добавляем следующее состояние в очередь
 
+    # Добавляем рычаг в комнату room3
+    game['room3']['lever'] = toggle_lever
+
     return graph
 
 
-# Функция перехода в другую комнату
-def go(room):
-    def func(state):
-        return dict(state, room=room)
-    return func
+def toggle_lever(state):
+    """
+    Функция переключения рычага.
+    """
+    if state['room'] == 'room3':
+        # Если рычаг нажат, делаем переход двусторонним
+        if state.get('lever', False):
+            return dict(state, lever=False, room='room0')  # Возвращаемся в room0
+        else:
+            return dict(state, lever=True)  # Рычаг в положении "выключен"
+    else:
+        return state
 
 
 # Описание игры
@@ -91,16 +111,21 @@ def get_current_room(state):
 
 
 def find_dead_ends(graph):
-    """    Находит тупики в графе.    Args:    - graph (dict): Граф состояний игры.    Returns:    - list: Список тупиков.    """
+    """
+    Находит тупики в графе.
+
+    Args:
+    - graph (dict): Граф состояний игры.
+
+    Returns:
+    - list: Список тупиков.
+    """
     dead_ends = []
 
     for state, actions in graph.items():
-        if len(actions) == 0:  # Условие добавлено для учета тупиковых состояний без выходящих связей
-            dead_ends.append(state)
-
-        if len(actions) == 1:
+        if len(actions) == 1:  # Если из текущего состояния только одно действие
             next_state = list(actions.values())[0]
-            if len(graph[next_state]) == 1:
+            if len(graph[next_state]) == 1:  # И если из следующего состояния тоже только одно действие
                 dead_ends.append(state)
 
     return dead_ends
@@ -112,9 +137,6 @@ print("Graph of states of the game:", graph)
 
 dead_ends = find_dead_ends(graph)
 print("Dead end:", dead_ends)
-
-import matplotlib.pyplot as plt
-import networkx as nx
 
 # Создание графа из словаря состояний игры
 G = nx.DiGraph()
