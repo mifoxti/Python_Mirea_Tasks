@@ -1,5 +1,5 @@
 import pytest
-from pr2_1 import distance
+from t1 import distance
 
 @pytest.fixture
 def coordinates():
