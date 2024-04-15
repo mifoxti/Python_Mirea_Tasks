@@ -1,53 +1,44 @@
-import unittest
+# -*- coding: utf-8 -*-
+
+from hypothesis import given
+from hypothesis.strategies import text
 
 
-class TestRLE(unittest.TestCase):
-    def test_encode_decode(self):
-        data = b'AAABBBCCCDDDEEE'
-        encoded_data = encode_rle(data)
-        decoded_data = decode_rle(encoded_data)
-        self.assertEqual(data, decoded_data)
+def rle_encode(s):
+    if not s:
+        return ''
 
-    def test_empty_string(self):
-        data = b''
-        encoded_data = encode_rle(data)
-        decoded_data = decode_rle(encoded_data)
-        self.assertEqual(data, decoded_data)
-
-    def test_single_character(self):
-        data = b'A'
-        encoded_data = encode_rle(data)
-        decoded_data = decode_rle(encoded_data)
-        self.assertEqual(data, decoded_data)
-
-
-def encode_rle(data):
-    encoded = bytes()
+    encoded = ''
     count = 1
-    last_char = data[0]
-    for i in range(1, len(data)):
-        if data[i] == last_char:
+    for i in range(1, len(s)):
+        if s[i] == s[i - 1]:
             count += 1
         else:
-            encoded += bytes([last_char])
-            encoded += bytes([count])
+            encoded += str(count) + s[i - 1]
             count = 1
-            last_char = data[i]
-    encoded += bytes([last_char])
-    encoded += bytes([count])
+    encoded += str(count) + s[-1]
     return encoded
 
 
-def decode_rle(data):
-    decoded = bytes()
+def rle_decode(s):
+    decoded = ''
     i = 0
-    while i < len(data):
-        count = data[i]
-        char = data[i + 1]
-        decoded += bytes([char] * count)
+    while i < len(s):
+        count = int(s[i])
+        decoded += s[i + 1] * count
         i += 2
     return decoded
 
 
-if __name__ == '__main__':
-    unittest.main()
+# Генерируем случайные строки для тестирования
+string_strategy = text()
+
+
+@given(string_strategy)
+def test_rle_encode_decode(s):
+    encoded = rle_encode(s)
+    decoded = rle_decode(encoded)
+    assert decoded == s
+
+
+test_rle_encode_decode()
