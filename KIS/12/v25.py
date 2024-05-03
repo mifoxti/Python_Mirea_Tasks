@@ -1,8 +1,9 @@
 from pprint import pprint
 from struct import *
 
-# НЕ РАБОТАЕТ
-def parse(buffer, offset, type, order='<'):
+
+# РАБОТАЕТ
+def parse(buffer, offset, type, order='>'):
     pattern = {
         'float': 'f',
         'double': 'd',
@@ -21,10 +22,40 @@ def parse(buffer, offset, type, order='<'):
     return value, offset + size
 
 
-def parse_d(buffer, offset):
-    d1, offset = parse(buffer, offset, 'uint16')
-    d2, offset = parse(buffer, offset, 'uint8')
-    return {'D1': d1, 'D2': d2}, offset
+def parse_a(buffer, offset):
+    offset = 4
+    a1 = ''
+    array_siz, offset = parse(buffer, offset, 'uint32')
+    adr_offset, offset = parse(buffer, offset, 'uint16')
+    for _ in range(array_siz):
+        val, adr_offset = parse(buffer, adr_offset, 'char')
+        a1 += (val.decode())
+    a2, offset = parse(buffer, offset, 'float')
+    a3_offset, offset = parse(buffer, offset, 'uint16')
+    a3, _ = parse_b(buffer, a3_offset)
+    a4, offset = parse(buffer, offset, 'uint8')
+    a5 = ''
+    for _ in range(2):
+        val, offset = parse(buffer, offset, 'char')
+        a5 += (val.decode())
+    a6, offset = parse(buffer, offset, 'float')
+    a7_offset, offset = parse(buffer, offset, 'uint32')
+    a7, _ = parse_e(buffer, a7_offset)
+    return {'A1': a1, 'A2': a2, 'A3': a3, 'A4': a4,
+            'A5': a5, 'A6': a6, 'A7': a7}, offset
+
+
+def parse_b(buffer, offset):
+    b1, offset = parse(buffer, offset, 'uint64')
+    b2_offset, offset = parse(buffer, offset, 'uint16')
+    b2, _ = parse_c(buffer, b2_offset)
+    b3, offset = parse(buffer, offset, 'int32')
+    b4 = []
+    for _ in range(7):
+        d_offset, offset = parse(buffer, offset, 'uint32')
+        d, _ = parse_d(buffer, d_offset)
+        b4.append(d)
+    return {'B1': b1, 'B2': b2, 'B3': b3, 'B4': b4}, offset
 
 
 def parse_c(buffer, offset):
@@ -33,6 +64,12 @@ def parse_c(buffer, offset):
     c3, offset = parse(buffer, offset, 'uint64')
     c4, offset = parse(buffer, offset, 'int32')
     return {'C1': c1, 'C2': c2, 'C3': c3, 'C4': c4}, offset
+
+
+def parse_d(buffer, offset):
+    d1, offset = parse(buffer, offset, 'uint16')
+    d2, offset = parse(buffer, offset, 'uint8')
+    return {'D1': d1, 'D2': d2}, offset
 
 
 def parse_e(buffer, offset):
@@ -50,41 +87,6 @@ def parse_e(buffer, offset):
     e7, offset = parse(buffer, offset, 'uint16')
     return {'E1': e1, 'E2': e2, 'E3': e3, 'E4': e4,
             'E5': e5, 'E6': e6, 'E7': e7}, offset
-
-
-def parse_b(buffer, offset):
-    b1, offset = parse(buffer, offset, 'uint64')
-    b2_offset, offset = parse(buffer, offset, 'uint16')
-    b2, _ = parse_c(buffer, b2_offset)
-    b3, offset = parse(buffer, offset, 'int32')
-    b4 = []
-    for _ in range(7):
-        b4_offset, offset = parse(buffer, offset, 'uint32')
-        val, _ = parse_d(buffer, b4_offset)
-        b4.append(val)
-    return {'B1': b1, 'B2': b2, 'B3': b3, 'B4': b4}, offset
-
-
-def parse_a(buffer, offset):
-    offset = 4
-    a1 = ''
-    array_siz, offset = parse(buffer, offset, 'uint32')
-    adr_offset, offset = parse(buffer, offset, 'uint16')
-    for _ in range(array_siz):
-        a1_char, adr_offset = parse(buffer, adr_offset, 'char')
-        a1 += a1_char.decode()
-    a2, offset = parse(buffer, offset, 'float')
-    a3_offset, offset = parse(buffer, offset, 'uint16')
-    a3, _ = parse_b(buffer, a3_offset)
-    a4, offset = parse(buffer, offset, 'uint8')
-    a5 = ""
-    for _ in range(2):
-        val, offset = parse(buffer, offset, 'char')
-        a5 += val.decode()
-    a6, offset = parse(buffer, offset, 'float')
-    a7_offset, offset = parse(buffer, offset, 'uint32')
-    a7, _ = parse_b(buffer, a7_offset)
-    return {'A1': a1, 'A2': a2, 'A3': a3, 'A4': a4, 'A5': a5, 'A6': a6, 'A7': a7}, offset
 
 
 def main(data):
