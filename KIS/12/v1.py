@@ -1,6 +1,7 @@
 from pprint import pprint
 from struct import *
 
+
 # РАБОТАЕТ
 def parse(buffer, offset, type, order='>'):
     pattern = {
