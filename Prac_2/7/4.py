@@ -72,4 +72,4 @@ def move_to_room(next_room_number):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.flip(debug=True)
