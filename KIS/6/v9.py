@@ -2,10 +2,10 @@ from math import floor
 
 
 def main(fontan):
-    H = [i for i in fontan if (i < 18) ^ (i > -72)]
+    HUI = [i for i in fontan if (i < 18) ^ (i > -72)]
     Alpha = [floor(i / 2) for i in fontan if (-83 <= i < -8)]
     ooo = [(i - 2 * i) for i in Alpha if -27 <= i <= 59]
-    Trezubec = [kpd * o for kpd in H for o in ooo if kpd < o]
+    Trezubec = [kpd * o for kpd in HUI for o in ooo if kpd < o]
     Sigma = sum([ogo * arpha for ogo in ooo for arpha in Trezubec])
     return len(ooo + Trezubec) - Sigma
 
