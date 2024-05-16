@@ -48,7 +48,8 @@ def parse_b(buffer, offset):
         val, adr_offset = parse(buffer, adr_offset, 'uint16')
         b5.append(val)
 
-    return {'B1': b1, 'B2': b2, 'B3': b3, 'B4': b4, 'B5': b5}, offset
+    return {'B1': b1, 'B2': b2, 'B3': b3,
+            'B4': b4, 'B5': b5}, offset
 
 
 def parse_c(buffer, offset):
