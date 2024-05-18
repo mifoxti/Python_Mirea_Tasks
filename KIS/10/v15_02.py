@@ -1,6 +1,5 @@
 def main(table):
     new_table = []
-    trans = {'Y': 'Выполнено', 'N': 'Не выполнено'}
     unique_rows = set()
     for string in table:
         row_tuple = tuple(string)
