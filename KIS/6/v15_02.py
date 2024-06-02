@@ -7,5 +7,6 @@ def main(k):
     product_l_A = len([(lll * a) for a in m for lll in fi])
     return product_l_A - Sigma
 
+
 print(main({-31, 68, -58, -57, -88, 41, 74, 14, 49, 58}))
 print(main({-31, 35, -92, 8, 74, 43, 15, -47, -12, -3}))

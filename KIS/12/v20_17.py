@@ -26,7 +26,7 @@ def parse_a(buffer, offset):
     a1, offset = parse(buffer, offset, 'int8')
     a2, offset = parse_b(buffer, offset)
     a3, offset = parse_c(buffer, offset)
-    a4, offset = parse(buffer, offset, 'uint16')
+    a4, offset = parse(buffer, offset, 'uint64')
     a5, offset = parse(buffer, offset, 'int64')
     return {'A1': a1, 'A2': a2, 'A3': a3, 'A4': a4,
             'A5': a5}, offset
