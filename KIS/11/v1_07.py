@@ -1,4 +1,4 @@
-class MealyError(Exception):
+class MachineError(Exception):
     pass
 
 
@@ -20,7 +20,7 @@ class MealyAutomaton:
             self.state = 'G'
             return 8
         else:
-            raise MealyError("look")
+            raise MachineError("look")
 
     def run(self):
         if self.state == 'B':
@@ -36,7 +36,7 @@ class MealyAutomaton:
             self.state = 'H'
             return 10
         else:
-            raise MealyError("run")
+            raise MachineError("run")
 
     def scrub(self):
         if self.state == 'C':
@@ -52,7 +52,7 @@ class MealyAutomaton:
             self.state = 'H'
             return 11
         else:
-            raise MealyError("scrub")
+            raise MachineError("scrub")
 
 
 def main():
@@ -71,10 +71,10 @@ def raises(method, error):
 def test():
     automaton = main()
     assert automaton.state == 'A'
-    raises(lambda: automaton.run(), MealyError)
-    raises(lambda: automaton.scrub(), MealyError)
+    raises(lambda: automaton.run(), MachineError)
+    raises(lambda: automaton.scrub(), MachineError)
     assert automaton.look() == 0
-    raises(lambda: automaton.look(), MealyError)
+    raises(lambda: automaton.look(), MachineError)
     assert automaton.state == 'B'
     assert automaton.run() == 1
     assert automaton.state == 'C'
