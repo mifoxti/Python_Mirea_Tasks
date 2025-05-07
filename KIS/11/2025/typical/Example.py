@@ -39,6 +39,7 @@ class MealyAutomat:
         self.transition_counts = {}
         self.vars = {}
         self.step_count = 0
+        self.executed_methods = set()
 
     # Пример теста для ошибки: raises(lambda: automaton.go('clear'), MachineException)
     # Пример теста для успеха: assert automaton.go('lower') == 'T1'
@@ -63,6 +64,10 @@ class MealyAutomat:
         self.state = next_state
         return output
 
+    def seen_method(self, method_name):
+        """Проверяет, выполнялся ли метод успешно ранее."""
+        return method_name in self.executed_methods
+
     # Пример теста: assert automaton.reset() == 'reset'
     def reset(self):
         self.state = 'v6'
@@ -73,6 +78,19 @@ class MealyAutomat:
     def seen_edge(self, from_state, to_state):
         return self.transition_counts.get((from_state, to_state), 0)
 
+    # Альтернативная реализация
+    def has_max_in_edges1(self):
+        in_counts = {}
+
+        # Собираем все target_state из всех переходов
+        for transitions in self.conditional_transitions.values():
+            for action, variants in transitions.items():
+                for (_, target, _) in variants:
+                    in_counts[target] = in_counts.get(target, 0) + 1
+
+        max_in = max(in_counts.values(), default=0)
+        return in_counts.get(self.state, 0) == max_in
+
     # Пример теста: assert automaton.has_max_in_edges()
     def has_max_in_edges(self):
         in_counts = {}
@@ -82,6 +100,20 @@ class MealyAutomat:
         max_in = max(in_counts.values(), default=0)
         return in_counts.get(self.state, 0) == max_in
 
+    # Считает количество уникальных ВЕТВЕЙ
+    # Пример теста: assert automaton.has_max_out_edges()
+    def has_max_out_edges1(self):
+        out_counts = {}
+        for state, transitions in self.conditional_transitions.items():
+            count = 0
+            for action, variants in transitions.items():
+                count += len(variants)
+            out_counts[state] = count
+
+        max_out = max(out_counts.values(), default=0)
+        return out_counts.get(self.state, 0) == max_out
+
+    # Считает количество уникальных ПЕРЕХОДОВ
     # Пример теста: assert automaton.has_max_out_edges()
     def has_max_out_edges(self):
         out_counts = {state: len(transitions)
@@ -113,6 +145,34 @@ class MealyAutomat:
             raise MachineException('unsupported')
         return method
 
+    # Альтернативный перехват несуществующих функций
+    # def _trigger_exists(self, name):
+    #     """Проверяет, существует ли триггер в любом состоянии автомата."""
+    #     return any(name in transitions
+    #                for transitions in
+    #                self.conditional_transitions.values())
+    #
+    # def _try_apply_trigger(self, name):
+    #     """Пытается применить триггер в текущем состоянии."""
+    #     current_transitions = self.conditional_transitions.get(self.state, {})
+    #     if name not in current_transitions:
+    #         return 'unsupported'
+    #
+    #     for conds, to_state, output in current_transitions[name]:
+    #         if all(self.vars.get(k) == v for k, v in conds.items()):
+    #             self.transition_counts[(self.state, to_state)] = (
+    #                     self.transition_counts.get((self.state,
+    #                                                 to_state), 0) + 1
+    #             )
+    #             self.state = to_state
+    #             self.step_count += 1
+    #             return output
+    #     return 'unsupported'
+    #
+    # def __getattr__(self, name):
+    #     if not self._trigger_exists(name):
+    #         return lambda: 'unknown'
+    #     return lambda: self._try_apply_trigger(name)
 
 def main():
     return MealyAutomat()
