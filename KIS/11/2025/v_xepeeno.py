@@ -1,28 +1,29 @@
 class MealyAutomat:
     def __init__(self):
-        self.state = 'C3'
+        self.state = 'w1'
 
         self.conditional_transitions = {
-            'C3': {
-                'visit': [({}, 'C2', 'p1')],
-                'widen': [({}, 'C0', 'p1')],
+            'w1': {
+                'crush': [({}, 'w2', 'V2')],
             },
-            'C2': {
-                'merge': [({}, 'C5', 'p0'), ],
+            'w2': {
+                'load': [({}, 'w5', 'V0'), ],
             },
-            'C5': {
-                'build': [({}, 'C2', 'p3'), ],
-                'slur': [({}, 'C0', 'p5')],
+            'w5': {
+                'check': [({'m': 1}, 'w0', 'V2'),
+                          ({'m': 0}, 'w3', 'V2'), ],
             },
-            'C0': {
-                'build': [({}, 'C4', 'p1')],
+            'w0': {
+                'merge': [({}, 'w1', 'V1')],
+                'lower': [({}, 'w3', 'V2')],
             },
-            'C4': {
-                'widen': [({'z': 1}, 'C3', 'p0'),
-                          ({'z': 0}, 'C1', 'p0'), ],
+            'w3': {
+                'load': [({}, 'w2', 'V1')],
+                'check': [({'f': 1}, 'w4', 'V2'),
+                          ({'f': 0}, 'w0', 'V1'), ],
             },
-            'C1': {
-                'widen': [({}, 'C0', 'p0')],
+            'w4': {
+                'merge': [({}, 'w6', 'V2')],
             },
         }
         self.transition_counts = {}
@@ -30,7 +31,7 @@ class MealyAutomat:
         self.executed_methods = set()
         self.step_count = 0
         self.last_output = None
-        self.executed_states = ['C3']
+        self.executed_states = ['w1']
 
     def _trigger_exists(self, name):
         return any(name in transitions
@@ -58,17 +59,17 @@ class MealyAutomat:
                 return output
         return 'unsupported'
 
+    def get_step(self):
+        return self.step_count
+
+    def seen_method(self, method):
+        return True if method in self.executed_methods else False
+
     def part_of_loop(self):
-        return True
-
-    def has_max_out_edges(self):
-        return True if self.state in ['C3', 'C5', 'C4'] else False
-
-    def has_max_in_edges(self):
-        return True if self.state == 'C0' else False
+        return True if self.state not in ['w4', 'w6'] else False
 
     def __getattr__(self, name):
-        name = name.replace('assign_', '')
+        name = name.replace('store_', '').replace('run_', '')
         if len(name) == 1:
             def set_var(val):
                 self.vars[name] = val
@@ -86,18 +87,22 @@ def main():
 
 def test():
     obj = main()
-    assert obj.has_max_in_edges() is False
-    assert obj.rev() == 'unknown'
-    assert obj.has_max_out_edges() is True
-    assert obj.merge() == 'unsupported'
-    assert obj.visit() == 'p1'
-    assert obj.merge() == 'p0'
-    assert obj.link() == 'unknown'
-    assert obj.slur() == 'p5'
-    assert obj.build() == 'p1'
+    assert obj.seen_method('merge') is False
+    assert obj.run_merge() == 'unsupported'
+    assert obj.store_f(1) is None
+    assert obj.seen_method('lower') is False
+    assert obj.run_order() == 'unknown'
+    assert obj.run_crush() == 'V2'
+    assert obj.run_load() == 'V0'
+    assert obj.seen_method('load') is True
+    assert obj.run_check() == 'unsupported'
+    assert obj.store_m(0) is None
+    assert obj.run_check() == 'V2'
     assert obj.part_of_loop() is True
-    assert obj.has_max_out_edges() is True
-    assert obj.widen() == 'unsupported'
-    assert obj.assign_z(1) is None
-    assert obj.widen() == 'p0'
-    assert obj.widen() == 'p1'
+    assert obj.run_check() == 'V2'
+    assert obj.run_load() == 'unsupported'
+    assert obj.get_step() == 4
+    assert obj.part_of_loop() is False
+    assert obj.run_merge() == 'V2'
+    assert obj.run_drag() == 'unknown'
+    assert obj.get_step() == 5
